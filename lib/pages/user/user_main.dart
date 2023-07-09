@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lostandfound/pages/login.dart';
 import 'package:lostandfound/pages/user/change_password.dart';
 import 'package:lostandfound/pages/user/dashboard.dart';
-import 'package:lostandfound/pages/user/profile.dart';
+import 'package:lostandfound/pages/user/yourdata.dart';
 
 class UserMain extends StatefulWidget {
   UserMain({Key? key}) : super(key: key);
@@ -16,7 +16,7 @@ class _UserMainState extends State<UserMain> {
   int _selectedIndex = 0;
   static List<Widget> _widgetOptions = <Widget>[
     Dashboard(),
-    Profile(),
+    YourData(),
     ChangePassword(),
   ];
   void _onItemTapped(int index) {
