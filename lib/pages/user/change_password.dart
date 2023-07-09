@@ -45,6 +45,27 @@ class _ChangePasswordState extends State<ChangePassword> {
       );
     } catch (e) {}
   }
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+  final email = FirebaseAuth.instance.currentUser!.email;
+  final creationTime = FirebaseAuth.instance.currentUser!.metadata.creationTime;
+
+  User? user = FirebaseAuth.instance.currentUser;
+
+  verifyEmail() async {
+    if (user != null && !user!.emailVerified) {
+      await user!.sendEmailVerification();
+      print('Verification Email has been sent');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.orangeAccent,
+          content: Text(
+            'Verification Email has been sent',
+            style: TextStyle(fontSize: 18.0, color: Colors.black),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +75,30 @@ class _ChangePasswordState extends State<ChangePassword> {
         padding: EdgeInsets.symmetric(vertical: 20, horizontal: 30),
         child: ListView(
           children: [
+                      Text(
+            'User ID: $uid',
+            style: TextStyle(fontSize: 18.0),
+          ),
+          Row(
+            children: [
+              Text(
+                'Email: $email',
+                style: TextStyle(fontSize: 18.0),
+              ),
+              user!.emailVerified
+                  ? Text(
+                      'verified',
+                      style: TextStyle(fontSize: 18.0, color: Colors.blueGrey),
+                    )
+                  : TextButton(
+                      onPressed: () => {verifyEmail()},
+                      child: Text('Verify Email'))
+            ],
+          ),
+          Text(
+            'Created: $creationTime',
+            style: TextStyle(fontSize: 18.0),
+          ),
             Container(
               margin: EdgeInsets.symmetric(vertical: 10.0),
               child: TextFormField(

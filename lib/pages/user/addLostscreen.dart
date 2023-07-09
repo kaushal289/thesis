@@ -119,8 +119,6 @@ class _AddLostPageState extends State<AddLostPage> {
                 icon: Icon(Icons.camera_alt),
               ),
               // Added code snippet ends here
-
-              
               SizedBox(height: 20),
               Container(
                 margin: EdgeInsets.symmetric(vertical: 10.0),
