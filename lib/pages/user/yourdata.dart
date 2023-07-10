@@ -10,7 +10,8 @@ class YourData extends StatefulWidget {
 }
 
 class _YourDataState extends State<YourData> {
-  late List<DocumentSnapshot> lostDocuments;
+  late List<DocumentSnapshot> lostDocuments = []; // Initialize the list
+
   late String currentUserEmail;
 
   @override
@@ -60,7 +61,7 @@ class _YourDataState extends State<YourData> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
-            if (lostDocuments != null)
+            if (lostDocuments.isNotEmpty) // Check if the list is not empty
               Expanded(
                 child: ListView.builder(
                   itemCount: lostDocuments.length,
@@ -109,7 +110,7 @@ class _YourDataState extends State<YourData> {
                   },
                 ),
               ),
-            if (lostDocuments == null)
+            if (lostDocuments.isEmpty) // Check if the list is empty
               Text(
                 'No lost data found',
                 style: TextStyle(fontSize: 18),

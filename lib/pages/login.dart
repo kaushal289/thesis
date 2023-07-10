@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lostandfound/pages/forgot_password.dart';
 import 'package:lostandfound/pages/signup.dart';
 import 'package:lostandfound/pages/user/user_main.dart';
@@ -21,10 +22,29 @@ class _LoginState extends State<Login> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  Future<void> saveLoginCredentials(String email, String password) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('login_email', email);
+    prefs.setString('login_password', password);
+  }
+
+  Future<String?> getSavedEmail() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('login_email');
+  }
+
+  Future<String?> getSavedPassword() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('login_password');
+  }
+
   userLogin() async {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+
+      await saveLoginCredentials(email, password);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -56,6 +76,25 @@ class _LoginState extends State<Login> {
         );
       }
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Retrieve saved email and password from SharedPreferences
+    getSavedEmail().then((value) {
+      setState(() {
+        email = value ?? "";
+        emailController.text = email;
+      });
+    });
+
+    getSavedPassword().then((value) {
+      setState(() {
+        password = value ?? "";
+        passwordController.text = password;
+      });
+    });
   }
 
   @override
@@ -98,6 +137,11 @@ class _LoginState extends State<Login> {
                     }
                     return null;
                   },
+                  onChanged: (value) {
+                    setState(() {
+                      email = value;
+                    });
+                  },
                 ),
               ),
               Container(
@@ -119,6 +163,11 @@ class _LoginState extends State<Login> {
                     }
                     return null;
                   },
+                  onChanged: (value) {
+                    setState(() {
+                      password = value;
+                    });
+                  },
                 ),
               ),
               Container(
@@ -130,10 +179,6 @@ class _LoginState extends State<Login> {
                       onPressed: () {
                         // Validate returns true if the form is valid, otherwise false.
                         if (_formKey.currentState!.validate()) {
-                          setState(() {
-                            email = emailController.text;
-                            password = passwordController.text;
-                          });
                           userLogin();
                         }
                       },
@@ -176,18 +221,6 @@ class _LoginState extends State<Login> {
                       },
                       child: Text('Signup'),
                     ),
-                    // TextButton(
-                    //   onPressed: () => {
-                    //     Navigator.pushAndRemoveUntil(
-                    //         context,
-                    //         PageRouteBuilder(
-                    //           pageBuilder: (context, a, b) => UserMain(),
-                    //           transitionDuration: Duration(seconds: 0),
-                    //         ),
-                    //         (route) => false)
-                    //   },
-                    //   child: Text('Dashboard'),
-                    // ),
                   ],
                 ),
               )

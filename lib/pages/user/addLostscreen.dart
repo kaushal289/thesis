@@ -21,29 +21,29 @@ class _AddLostPageState extends State<AddLostPage> {
   var color = "";
   var model = "";
   var ownerstatus = "";
+  var lostFoundOption = 'Lost';
   String imageUrl = '';
 
+  List<String> lostFoundOptions = ['Lost', 'Found'];
 
-  // Create a text controller and use it to retrieve the current value
-  // of the TextField.
   final emailController = TextEditingController();
   final companyController = TextEditingController();
   final colorController = TextEditingController();
   final modelController = TextEditingController();
   final ownerstatusController = TextEditingController();
 
+  File? selectedImage;
+
   @override
   void initState() {
     super.initState();
 
-    // Set the initial text for the emailController
     final emails = FirebaseAuth.instance.currentUser!.email;
     emailController.text = '$emails';
   }
 
   @override
   void dispose() {
-    // Clean up the controller when the widget is disposed.
     emailController.dispose();
     companyController.dispose();
     colorController.dispose();
@@ -60,7 +60,6 @@ class _AddLostPageState extends State<AddLostPage> {
     ownerstatusController.clear();
   }
 
-  // Adding Lost
   CollectionReference losts = FirebaseFirestore.instance.collection('losts');
 
   Future<void> addLost() async {
@@ -71,15 +70,38 @@ class _AddLostPageState extends State<AddLostPage> {
         'color': color,
         'model': model,
         'ownerstatus': ownerstatus,
-        
+        'lostfound': lostFoundOption,
+        'image': imageUrl,
       });
       print('Lost Added');
     } catch (error) {
       print('Failed to Add Lost: $error');
-      // Handle the error here, such as showing a dialog or displaying an error message.
     }
   }
 
+  Future<void> uploadImage() async {
+    ImagePicker imagePicker = ImagePicker();
+    XFile? file = await imagePicker.pickImage(source: ImageSource.gallery);
+    print('${file?.path}');
+
+    if (file == null) return;
+
+    String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
+
+    Reference referenceRoot = FirebaseStorage.instance.ref();
+    Reference referenceDirImages = referenceRoot.child('Lostimages');
+    Reference referenceImageToUpload = referenceDirImages.child(uniqueFileName);
+
+    try {
+      await referenceImageToUpload.putFile(File(file.path));
+      imageUrl = await referenceImageToUpload.getDownloadURL();
+      setState(() {
+        selectedImage = File(file.path);
+      });
+    } catch (error) {
+      print('Failed to upload image: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,30 +117,19 @@ class _AddLostPageState extends State<AddLostPage> {
             children: [
               IconButton(
                 onPressed: () async {
-                  // Step 1: Pick/Capture an image (image_picker)
-                  ImagePicker imagePicker = ImagePicker();
-                  XFile? file = await imagePicker.pickImage(source: ImageSource.gallery);
-                  print('${file?.path}');
-
-                  if (file == null) return;
-
-                  String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
-
-                  // Step 2: Upload to Firebase storage
-                  Reference referenceRoot = FirebaseStorage.instance.ref();
-                  Reference referenceDirImages = referenceRoot.child('Lostimages');
-                  Reference referenceImageToUpload = referenceDirImages.child(uniqueFileName);
-
-                  try {
-                    await referenceImageToUpload.putFile(File(file.path));
-                    imageUrl = await referenceImageToUpload.getDownloadURL();
-                  } catch (error) {
-                    // Handle error
-                  }
+                  await uploadImage();
                 },
                 icon: Icon(Icons.camera_alt),
               ),
-              // Added code snippet ends here
+              SizedBox(height: 20),
+              selectedImage != null
+                  ? Image.file(
+                      selectedImage!,
+                      height: 200,
+                      width: 200,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(),
               SizedBox(height: 20),
               Container(
                 margin: EdgeInsets.symmetric(vertical: 10.0),
@@ -192,7 +203,7 @@ class _AddLostPageState extends State<AddLostPage> {
                   controller: modelController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please Enter  model';
+                      return 'Please Enter model';
                     }
                     return null;
                   },
@@ -219,12 +230,40 @@ class _AddLostPageState extends State<AddLostPage> {
                 ),
               ),
               Container(
-                child: Row(
+                margin: EdgeInsets.symmetric(vertical: 10.0),
+                child: DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: 'Lost/Found: ',
+                    labelStyle: TextStyle(fontSize: 20.0),
+                    border: OutlineInputBorder(),
+                    errorStyle: TextStyle(color: Colors.redAccent, fontSize: 15),
+                  ),
+                  value: lostFoundOption,
+                  onChanged: (newValue) {
+                    setState(() {
+                      lostFoundOption = newValue!;
+                    });
+                  },
+                  items: lostFoundOptions.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select lost or found';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Container(
+               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        // Validate returns true if the form is valid, otherwise false.
                         if (_formKey.currentState!.validate()) {
                           setState(() {
                             email = emailController.text;
