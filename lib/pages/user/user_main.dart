@@ -28,27 +28,27 @@ class _UserMainState extends State<UserMain> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text("Welcome User"),
-            ElevatedButton(
-              onPressed: () async => {
-                await FirebaseAuth.instance.signOut(),
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Login(),
-                    ),
-                    (route) => false)
-              },
-              child: Text('Logout'),
-              style: ElevatedButton.styleFrom(primary: Colors.blueGrey),
-            )
-          ],
-        ),
-      ),
+      // appBar: AppBar(
+      //   title: Row(
+      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //     children: [
+      //       Text("Welcome User"),
+      //       ElevatedButton(
+      //         onPressed: () async => {
+      //           await FirebaseAuth.instance.signOut(),
+      //           Navigator.pushAndRemoveUntil(
+      //               context,
+      //               MaterialPageRoute(
+      //                 builder: (context) => Login(),
+      //               ),
+      //               (route) => false)
+      //         },
+      //         child: Text('Logout'),
+      //         style: ElevatedButton.styleFrom(primary: Colors.blueGrey),
+      //       )
+      //     ],
+      //   ),
+      // ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[

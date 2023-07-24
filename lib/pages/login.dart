@@ -17,6 +17,7 @@ class _LoginState extends State<Login> {
 
   var email = "";
   var password = "";
+  var saveCredentials = false; // Boolean variable to track checkbox state
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
   final emailController = TextEditingController();
@@ -43,7 +44,11 @@ class _LoginState extends State<Login> {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      await saveLoginCredentials(email, password);
+      if (saveCredentials) {
+        await saveLoginCredentials(email, password);
+      } else {
+        await clearLoginCredentials(); // Clear saved credentials
+      }
 
       Navigator.pushReplacement(
         context,
@@ -76,6 +81,12 @@ class _LoginState extends State<Login> {
         );
       }
     }
+  }
+
+  Future<void> clearLoginCredentials() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('login_email');
+    prefs.remove('login_password');
   }
 
   @override
@@ -175,18 +186,6 @@ class _LoginState extends State<Login> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        // Validate returns true if the form is valid, otherwise false.
-                        if (_formKey.currentState!.validate()) {
-                          userLogin();
-                        }
-                      },
-                      child: Text(
-                        'Login',
-                        style: TextStyle(fontSize: 18.0),
-                      ),
-                    ),
                     TextButton(
                       onPressed: () => {
                         Navigator.push(
@@ -201,6 +200,36 @@ class _LoginState extends State<Login> {
                         style: TextStyle(fontSize: 14.0),
                       ),
                     ),
+                    SizedBox(width: 16),
+                    Checkbox(
+                      value: saveCredentials,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          saveCredentials = value ?? false;
+                        });
+                      },
+                    ),
+                    Text('Remember me'),
+                  ],
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 60.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Validate returns true if the form is valid, otherwise false.
+                        if (_formKey.currentState!.validate()) {
+                          userLogin();
+                        }
+                      },
+                      child: Text(
+                        'Login',
+                        style: TextStyle(fontSize: 18.0),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -208,7 +237,7 @@ class _LoginState extends State<Login> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Don't have an Account? "),
+                   Text("Don't have an Account? "),
                     TextButton(
                       onPressed: () => {
                         Navigator.pushAndRemoveUntil(

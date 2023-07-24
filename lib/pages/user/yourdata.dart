@@ -68,11 +68,12 @@ class _YourDataState extends State<YourData> {
                   itemBuilder: (context, index) {
                     final lost = lostDocuments[index];
                     final lostId = lost.id;
-                    final email = lost['email'];
-                    final company = lost['company'];
-                    final color = lost['color'];
-                    final model = lost['model'];
-                    final ownerStatus = lost['ownerstatus'];
+                    final email = lost['email']?.toString() ?? 'N/A';
+                    final company = lost['company']?.toString() ?? 'N/A';
+                    final color = lost['color']?.toString() ?? 'N/A';
+                    final model = lost['model']?.toString() ?? 'N/A';
+                    final ownerStatus = lost['ownerstatus']?.toString() ?? 'N/A';
+                    
 
                     return Card(
                       child: ListTile(

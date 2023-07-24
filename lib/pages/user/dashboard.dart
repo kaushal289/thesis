@@ -52,15 +52,14 @@ class _DashboardState extends State<Dashboard> {
       }).toList();
     });
   }
-
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Flutter FireStore CRUD'),
+            Text('Add lost or found here'),
             ElevatedButton(
               onPressed: () => {
                 Navigator.push(
@@ -80,63 +79,45 @@ class _DashboardState extends State<Dashboard> {
         padding: EdgeInsets.all(10),
         child: Column(
           children: [
-            Text(
-              'Lost Items',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                controller: searchController,
-                onChanged: (value) {
-                  filterDocuments(value.toLowerCase());
-                },
-                decoration: InputDecoration(
-                  labelText: 'Search',
-                  prefixIcon: Icon(Icons.search),
-                ),
+            TextField(
+              controller: searchController,
+              onChanged: (value) {
+                filterDocuments(value.toLowerCase());
+              },
+              decoration: InputDecoration(
+                labelText: 'Search',
+                prefixIcon: Icon(Icons.search),
               ),
             ),
-            SizedBox(height: 20),
-            if (filteredDocuments.isNotEmpty) // Check if the filtered list is not empty
-              Expanded(
-                child: ListView.builder(
-                  itemCount: filteredDocuments.length,
-                  itemBuilder: (context, index) {
-                    final lost = filteredDocuments[index];
-                    final lostId = lost.id;
-                    final email = lost['email'];
-                    final company = lost['company'];
-                    final color = lost['color'];
-                    final model = lost['model'];
-                    final ownerStatus = lost['ownerstatus'];
+            SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: filteredDocuments.length,
+                itemBuilder: (context, index) {
+                  var document = filteredDocuments[index];
+                  var imageUrl = document['image'];
 
-                    return Card(
-                      child: ListTile(
-                        title: Text('Email: $email'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Company: $company'),
-                            Text('Color: $color'),
-                            Text('Model: $model'),
-                            Text('Owner Status: $ownerStatus'),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                  return ListTile(
+                    leading: imageUrl != null
+                        ? Image.network(
+                            imageUrl,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(Icons.image_not_supported);
+                            },
+                          )
+                        : Icon(Icons.image_not_supported),
+                    title: Text('Company: ${document['company']}'),
+                    subtitle: Text('Color: ${document['color']}${document['email']}'),
+                    trailing: Text('Owner Status: ${document['ownerstatus']}'),
+                  );
+                },
               ),
-            if (filteredDocuments.isEmpty) // Check if the filtered list is empty
-              Text(
-                'No lost data found',
-                style: TextStyle(fontSize: 18),
-              ),
+            ),
           ],
         ),
       ),
     );
   }
+
+  // ...
 }
