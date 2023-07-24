@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lostandfound/pages/user/dashboard.dart';
 import 'package:lostandfound/pages/user/user_main.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AddLostPage extends StatefulWidget {
   AddLostPage({Key? key}) : super(key: key);
@@ -74,18 +76,59 @@ class _AddLostPageState extends State<AddLostPage> {
 
   Future<void> addLost() async {
     try {
-      await losts.add({
-        'email': email,
-        'company': company,
-        'color': color,
-        'model': model,
-        'ownerstatus': ownerstatus,
-        'lostfound': lostFoundOption,
-        'moreInformation': moreInformation,
-        'location': location,
-        'image': imageUrl,
+      String fcmToken = await getFCMToken();
+
+    await losts.add({
+      'email': email,
+      'company': company,
+      'color': color,
+      'model': model,
+      'ownerstatus': ownerstatus,
+      'lostfound': lostFoundOption,
+      'moreInformation': moreInformation,
+      'location': location,
+      'image': imageUrl,
+      'fcmToken': fcmToken, // Save the FCM token in Firestore
+    });
+
+      // After adding the lost item to Firestore, check if it's found and send the notification
+      if (lostFoundOption == 'Found') {
+        QuerySnapshot querySnapshot = await losts
+            .where('lostfound', isEqualTo: 'Lost')
+            .where('color', isEqualTo: color)
+            .where('model', isEqualTo: model)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          querySnapshot.docs.forEach((doc) async {
+            print("this is working");
+            String fcmToken = doc['fcmToken'];
+            print(fcmToken); // Replace 'fcmToken' with the actual field name in your Firestore document that stores the FCM token for each user
+            String lostItemMessage = 'The lost item you were looking for has been found!';
+             // You can customize the message here if needed
+            await sendPushNotification(fcmToken, lostItemMessage);
+          });
+        }
+      }
+
+      // Show a success snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Successfully Registered!'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Navigate to the Dashboard after a delay of 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => UserMain(),
+          ),
+        );
       });
-      print('Lost Added');
     } catch (error) {
       print('Failed to Add Lost: $error');
     }
@@ -94,7 +137,6 @@ class _AddLostPageState extends State<AddLostPage> {
   Future<void> uploadImage() async {
     ImagePicker imagePicker = ImagePicker();
     XFile? file = await imagePicker.pickImage(source: ImageSource.gallery);
-    print('${file?.path}');
 
     if (file == null) return;
 
@@ -114,6 +156,48 @@ class _AddLostPageState extends State<AddLostPage> {
       print('Failed to upload image: $error');
     }
   }
+
+Future<String> getFCMToken() async {
+  return await FirebaseMessaging.instance.getToken() ?? '';
+}
+
+
+
+
+Future<void> sendPushNotification(String fcmToken, String message) async {
+  try {
+    if (fcmToken == null || fcmToken.isEmpty) {
+      print('FCM token is null or empty. Cannot send push notification.');
+      return;
+    }
+
+    var notification = {
+      'title': 'Item Found!',
+      'body': message,
+    };
+
+    var messageData = {
+      'notification': notification,
+      'data': {
+        'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+        'title': 'Item Found!',
+        'body': message,
+      },
+    };
+    print(messageData);
+
+    await FirebaseMessaging.instance.sendMessage(
+      to: fcmToken,
+      data: messageData['data'],
+    );
+
+    print('Push notification sent!');
+  } catch (e) {
+    print('Failed to send push notification: $e');
+  }
+}
+
+
 
   String? validateOwnerStatus(String? value) {
     if (value == null || value.isEmpty) {
@@ -388,25 +472,6 @@ class _AddLostPageState extends State<AddLostPage> {
                                   location = locationController.text;
                                   addLost();
                                   clearText();
-
-                                  // Show a success snackbar
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Successfully Registered!'),
-                                      duration: Duration(seconds: 2),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-
-                                  // Navigate to the Dashboard after a delay of 3 seconds
-                                  Future.delayed(Duration(seconds: 2), () {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => UserMain(),
-                                      ),
-                                    );
-                                  });
                                 });
                               }
                             }

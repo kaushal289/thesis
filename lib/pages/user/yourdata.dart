@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'edit_lost_page.dart';
+
+void main() {
+  runApp(MaterialApp(
+    home: YourData(),
+  ));
+}
+
 class YourData extends StatefulWidget {
   YourData({Key? key}) : super(key: key);
 
@@ -46,6 +54,15 @@ class _YourDataState extends State<YourData> {
     }
   }
 
+  void navigateToEditPage(DocumentSnapshot lostDocument) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditLostPage(lostDocument: lostDocument),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,7 +90,7 @@ class _YourDataState extends State<YourData> {
                     final color = lost['color']?.toString() ?? 'N/A';
                     final model = lost['model']?.toString() ?? 'N/A';
                     final ownerStatus = lost['ownerstatus']?.toString() ?? 'N/A';
-                    
+                    final imageUrl = lost['image']?.toString() ?? '';
 
                     return Card(
                       child: ListTile(
@@ -87,13 +104,15 @@ class _YourDataState extends State<YourData> {
                             Text('Owner Status: $ownerStatus'),
                           ],
                         ),
+                        leading: imageUrl.isNotEmpty
+                            ? Image.network(imageUrl, height: 50, width: 50)
+                            : Icon(Icons.image, size: 50),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
                               onPressed: () {
-                                // Implement edit functionality here
-                                print('Edit button pressed for lost ID: $lostId');
+                                navigateToEditPage(lost);
                               },
                               icon: Icon(Icons.edit),
                             ),

@@ -43,6 +43,8 @@ dependencies:
   image_picker: ^0.8.4+4
   firebase_storage: ^11.2.4
   shared_preferences: ^2.2.0
+  firebase_messaging: ^14.6.5
+  awesome_notifications: ^0.6.21
 
 dev_dependencies:
   flutter_test:

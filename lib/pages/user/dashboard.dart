@@ -25,9 +25,8 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> fetchLostData() async {
     try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('losts')
-          .get();
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('losts').get();
 
       setState(() {
         lostDocuments = querySnapshot.docs;
@@ -45,14 +44,24 @@ class _DashboardState extends State<Dashboard> {
         final company = document['company'].toString().toLowerCase();
         final color = document['color'].toString().toLowerCase();
         final model = document['model'].toString().toLowerCase();
+        final location = document['location'].toString().toLowerCase();
+        final lostFound = document['lostfound'].toString().toLowerCase();
+        final ownerStatus = document['ownerstatus'].toString().toLowerCase();
+        final moreInformation = document['moreInformation'].toString().toLowerCase();
+
         return email.contains(query) ||
             company.contains(query) ||
             color.contains(query) ||
-            model.contains(query);
+            model.contains(query) ||
+            location.contains(query) ||
+            lostFound.contains(query) ||
+            ownerStatus.contains(query) ||
+            moreInformation.contains(query);
       }).toList();
     });
   }
- @override
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -107,8 +116,18 @@ class _DashboardState extends State<Dashboard> {
                           )
                         : Icon(Icons.image_not_supported),
                     title: Text('Company: ${document['company']}'),
-                    subtitle: Text('Color: ${document['color']}${document['email']}'),
-                    trailing: Text('Owner Status: ${document['ownerstatus']}'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Color: ${document['color']}'),
+                        Text('Email: ${document['email']}'),
+                        Text('Model: ${document['model']}'),
+                        Text('Location: ${document['location']}'),
+                        Text('Lost/Found: ${document['lostfound']}'),
+                        Text('Owner Status: ${document['ownerstatus']}'),
+                        Text('More Information: ${document['moreInformation']}'),
+                      ],
+                    ),
                   );
                 },
               ),
@@ -118,6 +137,4 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
-
-  // ...
 }
