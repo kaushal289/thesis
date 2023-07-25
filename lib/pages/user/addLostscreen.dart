@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +10,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:lostandfound/pages/user/dashboard.dart';
 import 'package:lostandfound/pages/user/user_main.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
+
 
 class AddLostPage extends StatefulWidget {
   AddLostPage({Key? key}) : super(key: key);
@@ -103,7 +106,7 @@ class _AddLostPageState extends State<AddLostPage> {
           querySnapshot.docs.forEach((doc) async {
             print("this is working");
             String fcmToken = doc['fcmToken'];
-            print(fcmToken); // Replace 'fcmToken' with the actual field name in your Firestore document that stores the FCM token for each user
+         // Replace 'fcmToken' with the actual field name in your Firestore document that stores the FCM token for each user
             String lostItemMessage = 'The lost item you were looking for has been found!';
              // You can customize the message here if needed
             await sendPushNotification(fcmToken, lostItemMessage);
@@ -165,37 +168,47 @@ Future<String> getFCMToken() async {
 
 
 Future<void> sendPushNotification(String fcmToken, String message) async {
-  try {
-    if (fcmToken == null || fcmToken.isEmpty) {
-      print('FCM token is null or empty. Cannot send push notification.');
-      return;
-    }
-
-    var notification = {
-      'title': 'Item Found!',
-      'body': message,
-    };
-
-    var messageData = {
-      'notification': notification,
-      'data': {
+    try {
+      if (fcmToken == null || fcmToken.isEmpty) {
+        print('FCM token is null or empty. Cannot send push notification.');
+        return;
+      }
+      var messageData = {
         'click_action': 'FLUTTER_NOTIFICATION_CLICK',
         'title': 'Item Found!',
         'body': message,
-      },
-    };
-    print(messageData);
-
-    await FirebaseMessaging.instance.sendMessage(
-      to: fcmToken,
-      data: messageData['data'],
-    );
-
-    print('Push notification sent!');
-  } catch (e) {
-    print('Failed to send push notification: $e');
+      };
+      print(fcmToken);
+      print(messageData);
+      await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'key=AAAAhftfClQ:APA91bHAuhuGL1-eHsO_f0iu51oKKNLwwm6ucCBu6rMXLhmc5Nb-c3ntGyBpq3VLM6PaCwYyJGssUxEfh4c2FGsRqkwXHXnM9qkHS81zgvwc2fH5O6jAdd1lHVHODPXQ4TXJgz_5Xs5G', // Replace 'YOUR_SERVER_KEY' with your actual FCM server key
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'notification': <String, dynamic>{
+              'body': message,
+              'title': 'Item Found!',
+            },
+            'priority': 'high',
+            'data': <String, dynamic>{
+              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              'id': '1',
+              'status': 'done',
+            },
+            'to': fcmToken,
+          },
+        ),
+      );
+      print('Push notification sent!');
+    } catch (e) {
+      print('Failed to send push notification: $e');
+    }
   }
-}
+
+
 
 
 
