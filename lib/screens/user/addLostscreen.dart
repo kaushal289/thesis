@@ -239,7 +239,16 @@ class _AddLostPageState extends State<AddLostPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Lost"),
+        title: Text("Add Lost or Found"),
+        backgroundColor: Color.fromARGB(255, 24, 119, 242),
+        elevation: 0.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(25),
+            bottomLeft: Radius.circular(25),
+          ),
+        ),
+        centerTitle: true,
       ),
       body: Form(
         key: _formKey,
@@ -459,6 +468,7 @@ class _AddLostPageState extends State<AddLostPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton(
+                      
                       onPressed: isImageSelected || !isFoundOptionSelected
                           ? () {
                               if (_formKey.currentState!.validate()) {
@@ -474,9 +484,12 @@ class _AddLostPageState extends State<AddLostPage> {
                               }
                             }
                           : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 24, 119, 242),
+                          ),
                       child: Text(
                         'Register',
-                        style: TextStyle(fontSize: 18.0),
+                        style: TextStyle(fontSize: 18.0 ),
                       ),
                     ),
                     ElevatedButton(

@@ -1,8 +1,8 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:lostandfound/screens/user/yourdata.dart';
 
 class EditLostPage extends StatefulWidget {
@@ -41,21 +41,45 @@ class _EditLostPageState extends State<EditLostPage> {
     location = widget.lostDocument['location'];
   }
 
-  Future<void> updateLost() async {
+  Future<void> uploadImageAndUpdateLost() async {
     try {
-      await widget.lostDocument.reference.update({
-        'email': email,
-        'company': company,
-        'color': color,
-        'model': model,
-        'ownerstatus': ownerStatus,
-        'lostfound': lostFoundOption,
-        'moreInformation': moreInformation,
-        'location': location,
-      });
+      if (selectedImage != null) {
+        final imageFileName = DateTime.now().millisecondsSinceEpoch.toString();
+        final storageReference = FirebaseStorage.instance.ref()
+            .child('YOUR_BUCKET_NAME')
+            .child('lost_images')
+            .child('$imageFileName.jpg');
+
+        final uploadTask = storageReference.putFile(selectedImage!);
+        final snapshot = await uploadTask;
+        final imageUrl = await snapshot.ref.getDownloadURL();
+
+        await widget.lostDocument.reference.update({
+          'email': email,
+          'company': company,
+          'color': color,
+          'model': model,
+          'ownerstatus': ownerStatus,
+          'lostfound': lostFoundOption,
+          'moreInformation': moreInformation,
+          'location': location,
+          'image': imageUrl,
+        });
+      } else {
+        await widget.lostDocument.reference.update({
+          'email': email,
+          'company': company,
+          'color': color,
+          'model': model,
+          'ownerstatus': ownerStatus,
+          'lostfound': lostFoundOption,
+          'moreInformation': moreInformation,
+          'location': location,
+        });
+      }
+
       print('Lost Updated');
 
-      // Show SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Successfully Updated!'),
@@ -64,18 +88,11 @@ class _EditLostPageState extends State<EditLostPage> {
         ),
       );
 
-      // Navigate to the YourData screen after a delay of 2 seconds
-      Future.delayed(Duration(seconds: 2), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => YourData(),
-          ),
-        );
-      });
+      Navigator.pop(context);
+      
     } catch (error) {
       print('Failed to Update Lost: $error');
-      // Show SnackBar for failure
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to update Lost: $error'),
@@ -95,7 +112,6 @@ class _EditLostPageState extends State<EditLostPage> {
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     String imageUrl = getImageUrl();
@@ -335,7 +351,7 @@ class _EditLostPageState extends State<EditLostPage> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    updateLost();
+                    uploadImageAndUpdateLost();
                   }
                 },
                 child: Text('Update'),

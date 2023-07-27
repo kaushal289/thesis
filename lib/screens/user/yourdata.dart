@@ -54,27 +54,26 @@ class _YourDataState extends State<YourData> {
     }
   }
 
-  void navigateToEditPage(DocumentSnapshot lostDocument) {
-    Navigator.push(
+  Future<void> navigateToEditPage(DocumentSnapshot lostDocument) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => EditLostPage(lostDocument: lostDocument),
       ),
     );
+    fetchLostData(); // Refresh the data after navigating back from EditLostPage
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Lost Data'),
-      ),
+      
       body: Padding(
         padding: EdgeInsets.all(10),
         child: Column(
           children: [
             Text(
-              'Lost Items',
+              'Your Added Data',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
