@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:lostandfound/pages/user/yourdata.dart';
+import 'package:lostandfound/screens/user/yourdata.dart';
 
 class EditLostPage extends StatefulWidget {
   final DocumentSnapshot lostDocument;

@@ -7,11 +7,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:lostandfound/pages/user/dashboard.dart';
-import 'package:lostandfound/pages/user/user_main.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:lostandfound/screens/user/user_main.dart';
 
 class AddLostPage extends StatefulWidget {
   AddLostPage({Key? key}) : super(key: key);
@@ -71,28 +68,46 @@ class _AddLostPageState extends State<AddLostPage> {
     selectedImage = null; // Clear selected image when resetting the form
     imageUrl = '';
     setState(() {
-      ownerstatus = 'Not found'; // Reset owner status to default value
+      ownerstatus = 'Not found'; // Reset owner status to the default value
     });
   }
 
   CollectionReference losts = FirebaseFirestore.instance.collection('losts');
 
+  Future<void> uploadImageAndAddLost() async {
+    try {
+      if (selectedImage != null) {
+        String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
+        Reference referenceRoot = FirebaseStorage.instance.ref();
+        Reference referenceDirImages = referenceRoot.child('Lostimages');
+        Reference referenceImageToUpload = referenceDirImages.child(uniqueFileName);
+
+        await referenceImageToUpload.putFile(selectedImage!);
+        imageUrl = await referenceImageToUpload.getDownloadURL();
+      }
+
+      await addLost();
+    } catch (error) {
+      print('Failed to upload image and add lost: $error');
+    }
+  }
+
   Future<void> addLost() async {
     try {
       String fcmToken = await getFCMToken();
 
-    await losts.add({
-      'email': email,
-      'company': company,
-      'color': color,
-      'model': model,
-      'ownerstatus': ownerstatus,
-      'lostfound': lostFoundOption,
-      'moreInformation': moreInformation,
-      'location': location,
-      'image': imageUrl,
-      'fcmToken': fcmToken, // Save the FCM token in Firestore
-    });
+      await losts.add({
+        'email': email,
+        'company': company,
+        'color': color,
+        'model': model,
+        'ownerstatus': ownerstatus,
+        'lostfound': lostFoundOption,
+        'moreInformation': moreInformation,
+        'location': location,
+        'image': imageUrl,
+        'fcmToken': fcmToken, // Save the FCM token in Firestore
+      });
 
       // After adding the lost item to Firestore, check if it's found and send the notification
       if (lostFoundOption == 'Found') {
@@ -106,9 +121,9 @@ class _AddLostPageState extends State<AddLostPage> {
           querySnapshot.docs.forEach((doc) async {
             print("this is working");
             String fcmToken = doc['fcmToken'];
-         // Replace 'fcmToken' with the actual field name in your Firestore document that stores the FCM token for each user
+            // Replace 'fcmToken' with the actual field name in your Firestore document that stores the FCM token for each user
             String lostItemMessage = 'The lost item you were looking for has been found!';
-             // You can customize the message here if needed
+            // You can customize the message here if needed
             await sendPushNotification(fcmToken, lostItemMessage);
           });
         }
@@ -137,37 +152,11 @@ class _AddLostPageState extends State<AddLostPage> {
     }
   }
 
-  Future<void> uploadImage() async {
-    ImagePicker imagePicker = ImagePicker();
-    XFile? file = await imagePicker.pickImage(source: ImageSource.gallery);
-
-    if (file == null) return;
-
-    String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
-
-    Reference referenceRoot = FirebaseStorage.instance.ref();
-    Reference referenceDirImages = referenceRoot.child('Lostimages');
-    Reference referenceImageToUpload = referenceDirImages.child(uniqueFileName);
-
-    try {
-      await referenceImageToUpload.putFile(File(file.path));
-      imageUrl = await referenceImageToUpload.getDownloadURL();
-      setState(() {
-        selectedImage = File(file.path);
-      });
-    } catch (error) {
-      print('Failed to upload image: $error');
-    }
+  Future<String> getFCMToken() async {
+    return await FirebaseMessaging.instance.getToken() ?? '';
   }
 
-Future<String> getFCMToken() async {
-  return await FirebaseMessaging.instance.getToken() ?? '';
-}
-
-
-
-
-Future<void> sendPushNotification(String fcmToken, String message) async {
+  Future<void> sendPushNotification(String fcmToken, String message) async {
     try {
       if (fcmToken == null || fcmToken.isEmpty) {
         print('FCM token is null or empty. Cannot send push notification.');
@@ -175,7 +164,7 @@ Future<void> sendPushNotification(String fcmToken, String message) async {
       }
       var messageData = {
         'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-        'title': 'Item Found!',
+        'title': '  ',
         'body': message,
       };
       print(fcmToken);
@@ -207,10 +196,6 @@ Future<void> sendPushNotification(String fcmToken, String message) async {
       print('Failed to send push notification: $e');
     }
   }
-
-
-
-
 
   String? validateOwnerStatus(String? value) {
     if (value == null || value.isEmpty) {
@@ -483,7 +468,7 @@ Future<void> sendPushNotification(String fcmToken, String message) async {
                                   model = modelController.text;
                                   moreInformation = moreInformationController.text;
                                   location = locationController.text;
-                                  addLost();
+                                  uploadImageAndAddLost(); // Call the updated function here
                                   clearText();
                                 });
                               }
@@ -510,5 +495,28 @@ Future<void> sendPushNotification(String fcmToken, String message) async {
         ),
       ),
     );
+  }
+
+  Future<void> uploadImage() async {
+    ImagePicker imagePicker = ImagePicker();
+    XFile? file = await imagePicker.pickImage(source: ImageSource.gallery);
+
+    if (file == null) return;
+
+    String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
+
+    Reference referenceRoot = FirebaseStorage.instance.ref();
+    Reference referenceDirImages = referenceRoot.child('Lostimages');
+    Reference referenceImageToUpload = referenceDirImages.child(uniqueFileName);
+
+    try {
+      await referenceImageToUpload.putFile(File(file.path));
+      imageUrl = await referenceImageToUpload.getDownloadURL();
+      setState(() {
+        selectedImage = File(file.path);
+      });
+    } catch (error) {
+      print('Failed to upload image: $error');
+    }
   }
 }
