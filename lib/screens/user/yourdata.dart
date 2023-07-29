@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'edit_lost_page.dart';
+import 'edit_your_data.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -72,7 +72,7 @@ class _YourDataState extends State<YourData> {
         padding: EdgeInsets.all(10),
         child: Column(
           children: [
-            Text(
+            const Text(
               'Your Added Data',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
@@ -130,7 +130,7 @@ class _YourDataState extends State<YourData> {
                 ),
               ),
             if (lostDocuments.isEmpty) // Check if the list is empty
-              Text(
+              const Text(
                 'No lost data found',
                 style: TextStyle(fontSize: 18),
               ),

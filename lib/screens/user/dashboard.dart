@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:lostandfound/screens/user/addLostscreen.dart';
+import 'package:lostandfound/screens/user/add.dart';
+import 'package:lostandfound/screens/user/info.dart';
 
 class Dashboard extends StatefulWidget {
   Dashboard({Key? key}) : super(key: key);
@@ -61,6 +62,15 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
+  void _onTileClicked(DocumentSnapshot document) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InfoScreen(document: document),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -100,10 +110,11 @@ class _DashboardState extends State<Dashboard> {
             },
             decoration: InputDecoration(
               labelText: 'Search',
-              prefixIcon: Icon(Icons.search,
-              color: Color.fromARGB(255, 24, 119, 242),),
+              prefixIcon: Icon(
+                Icons.search,
+                color: Color.fromARGB(255, 24, 119, 242),
+              ),
               labelStyle: TextStyle(color: Colors.black),
-              
             ),
           ),
           SizedBox(height: 10),
@@ -114,14 +125,20 @@ class _DashboardState extends State<Dashboard> {
                 var document = filteredDocuments[index];
                 var imageUrl = document['image'];
 
-                return ListTile(
-                  leading: Container(
-                    margin: EdgeInsets.only(top: 30),
-                    
-                          height: 150,
-                          width: 120,
-                          child: imageUrl != null
-                            ? Align(
+                return Card( // Wrap each ListTile with Card
+                  elevation: 4, // Set the elevation to control the shadow intensity
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // Add rounded corners to the Card
+                    side: BorderSide(color: Colors.blue, width:0.5 ), // Add a blue border to the Card
+                  ),
+                  child: ListTile(
+                    onTap: () => _onTileClicked(document),
+                    leading: Container(
+                      margin: EdgeInsets.only(top: 30),
+                      height: 150,
+                      width: 120,
+                      child: imageUrl != null
+                          ? Align(
                               alignment: Alignment.center,
                               child: Transform.scale(
                                 scale: 4, // You can adjust this value to increase or decrease the size (1.0 means original size).
@@ -133,25 +150,23 @@ class _DashboardState extends State<Dashboard> {
                                 ),
                               ),
                             )
-                            : Icon(Icons.image_not_supported),
-                        ),
-                  title: Text('Company: ${document['company']}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Color: ${document['color']}'),
-                      Text('Email: ${document['email']}'),
-                      Text('Model: ${document['model']}'),
-                      Text('Location: ${document['location']}'),
-                      Text('Lost/Found: ${document['lostfound']}'),
-                      Text('Owner Status: ${document['ownerstatus']}'),
-                      Text('More Information: ${document['moreInformation']}'),
-                    ],
+                          : Icon(Icons.image_not_supported),
+                    ),
+                    title: Text('Company: ${document['company']}'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Color: ${document['color']}'),
+                        Text('Email: ${document['email']}'),
+                        Text('Model: ${document['model']}'),
+                        Text('Location: ${document['location']}'),
+                        Text('Lost/Found: ${document['lostfound']}'),
+                        Text('Owner Status: ${document['ownerstatus']}'),
+                        Text('More Information: ${document['moreInformation']}'),
+                      ],
+                    ),
                   ),
-                  
                 );
-                
-                
               },
             ),
           ),

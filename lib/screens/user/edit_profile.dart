@@ -82,6 +82,14 @@ class _ChangePasswordState extends State<ChangePassword> {
     }
   }
 
+  // Custom validation for new password field
+  String? validateNewPassword(String? value) {
+    if (value != null && value.isNotEmpty && value.length < 6) {
+      return 'Password should be at least 6 characters long';
+    }
+    return null;
+  }
+
   // Function to update user information in Firebase Firestore
   updateUserInformation() async {
     try {
@@ -121,6 +129,13 @@ class _ChangePasswordState extends State<ChangePassword> {
         padding: EdgeInsets.symmetric(vertical: 20, horizontal: 30),
         child: ListView(
           children: [
+            Center(
+              child: Text(
+                'Edit Profile',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
+            SizedBox(height: 20),
             Container(
               margin: EdgeInsets.symmetric(vertical: 10.0),
               child: TextFormField(
@@ -134,9 +149,8 @@ class _ChangePasswordState extends State<ChangePassword> {
                   errorStyle: TextStyle(color: Colors.redAccent, fontSize: 15),
                 ),
                 controller: newPasswordController,
-                // New password field is not required, so the validator always returns null.
-                // You can add custom validation if needed.
-                validator: (_) => null,
+                // New password field is not required, so we use the custom validation function.
+                validator: validateNewPassword,
               ),
             ),
             Container(
@@ -231,6 +245,11 @@ class _ChangePasswordState extends State<ChangePassword> {
                   }
                 }
               },
+              style: ElevatedButton.styleFrom(
+                    primary: Color.fromARGB(255, 24, 119, 242), // Set the same color here for consistency
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
               child: Text(
                 'Update Information',
                 style: TextStyle(fontSize: 18.0),

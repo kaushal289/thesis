@@ -62,7 +62,7 @@ class _SignupState extends State<Signup> {
         print(userCredential);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.redAccent,
+            backgroundColor: Color.fromARGB(255, 10, 151, 0),
             content: Text(
               "Registered Successfully. Please Login..",
               style: TextStyle(fontSize: 20.0),
@@ -88,12 +88,12 @@ class _SignupState extends State<Signup> {
             ),
           );
         } else if (e.code == 'email-already-in-use') {
-          print("Account Already exists");
+          print("Account Already exists. Use different email.");
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: Colors.orangeAccent,
               content: Text(
-                "Account Already exists",
+                "Account Already exists. Use different email.",
                 style: TextStyle(fontSize: 18.0, color: Colors.black),
               ),
             ),

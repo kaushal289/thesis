@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lostandfound/screens/forgot_password.dart';
 import 'package:lostandfound/screens/signup.dart';
-import 'package:lostandfound/screens/user/user_main.dart';
+import 'package:lostandfound/screens/user/navigationbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {

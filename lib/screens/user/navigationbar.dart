@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lostandfound/screens/login.dart';
-import 'package:lostandfound/screens/user/change_password.dart';
+import 'package:lostandfound/screens/user/edit_profile.dart';
 import 'package:lostandfound/screens/user/dashboard.dart';
 import 'package:lostandfound/screens/user/yourdata.dart';
 
@@ -64,12 +64,19 @@ class _UserMainState extends State<UserMain> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Lost and Found"),
+        leading: Padding(
+          padding: EdgeInsets.all(8.0), // Adjust padding as needed
+          child: Image.asset('assets/images/logo.png'), // Replace 'assets/logo.png' with your logo asset path
+        ),
         actions: [
           ElevatedButton(
             onPressed: _logout,
             child: Text(
               'Logout',
-              style: TextStyle(color: const Color.fromARGB(255, 255, 121, 111), fontSize: 18,),
+              style: TextStyle(
+                color: const Color.fromARGB(255, 255, 121, 111),
+                fontSize: 18,
+              ),
             ),
             style: ElevatedButton.styleFrom(
               primary: Colors.transparent, // Set background color to transparent
@@ -100,12 +107,12 @@ class _UserMainState extends State<UserMain> {
               label: 'Dashboard',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'My Profile',
+              icon: Icon(Icons.file_copy),
+              label: 'My Data',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Change Password',
+              icon: Icon(Icons.person),
+              label: 'Profile',
             ),
           ],
           currentIndex: _selectedIndex,

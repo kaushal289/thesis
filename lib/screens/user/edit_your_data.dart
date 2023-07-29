@@ -25,6 +25,7 @@ class _EditLostPageState extends State<EditLostPage> {
   late String lostFoundOption;
   late String moreInformation;
   late String location;
+  late String contactNumber;
   File? selectedImage;
 
   @override
@@ -39,6 +40,7 @@ class _EditLostPageState extends State<EditLostPage> {
     lostFoundOption = widget.lostDocument['lostfound'];
     moreInformation = widget.lostDocument['moreInformation'];
     location = widget.lostDocument['location'];
+    contactNumber = widget.lostDocument['contactNumber'];
   }
 
   Future<void> uploadImageAndUpdateLost() async {
@@ -63,6 +65,7 @@ class _EditLostPageState extends State<EditLostPage> {
           'lostfound': lostFoundOption,
           'moreInformation': moreInformation,
           'location': location,
+          'contactNumber': contactNumber,
           'image': imageUrl,
         });
       } else {
@@ -74,6 +77,7 @@ class _EditLostPageState extends State<EditLostPage> {
           'ownerstatus': ownerStatus,
           'lostfound': lostFoundOption,
           'moreInformation': moreInformation,
+          'contactNumber': contactNumber, 
           'location': location,
         });
       }
@@ -118,7 +122,8 @@ class _EditLostPageState extends State<EditLostPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Edit Lost"),
+        title: Center(child: Text("Edit Lost")),
+        backgroundColor: Color.fromARGB(255, 24, 119, 242),
       ),
       body: Form(
         key: _formKey,
@@ -147,8 +152,30 @@ class _EditLostPageState extends State<EditLostPage> {
               ElevatedButton(
                 onPressed: pickImage,
                 child: Text('Select Image'),
+                style: ElevatedButton.styleFrom(
+                  primary: Color.fromARGB(255, 24, 119, 242), // Set the select image button color
+                ),
               ),
               SizedBox(height: 10),
+
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10.0),
+                child: DropdownButtonFormField<String>(
+                  value: lostFoundOption,
+                  onChanged: (newValue) {
+                    setState(() {
+                      lostFoundOption = newValue!;
+                    });
+                  },
+                  items: ['Lost', 'Found'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  validator: validateLostFound,
+                ),
+              ),
 
               // Email Field
               Container(
@@ -307,22 +334,23 @@ class _EditLostPageState extends State<EditLostPage> {
               ),
 
               // Lost/Found Dropdown
+              
               Container(
                 margin: EdgeInsets.symmetric(vertical: 10.0),
-                child: DropdownButtonFormField<String>(
-                  value: lostFoundOption,
-                  onChanged: (newValue) {
+                child: TextFormField(
+                  initialValue: contactNumber,
+                  decoration: InputDecoration(
+                    labelText: 'contactNumber: ',
+                    labelStyle: TextStyle(fontSize: 20.0),
+                    border: OutlineInputBorder(),
+                    errorStyle: TextStyle(color: Colors.redAccent, fontSize: 15),
+                  ),
+                  onChanged: (value) {
                     setState(() {
-                      lostFoundOption = newValue!;
+                      contactNumber = value;
                     });
                   },
-                  items: ['Lost', 'Found'].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  validator: validateLostFound,
+                  validator: validatecontactNumber,
                 ),
               ),
 
@@ -355,6 +383,9 @@ class _EditLostPageState extends State<EditLostPage> {
                   }
                 },
                 child: Text('Update'),
+                style: ElevatedButton.styleFrom(
+                  primary: Color.fromARGB(255, 24, 119, 242), // Set the select image button color
+                ),
               ),
             ],
           ),
@@ -386,6 +417,13 @@ class _EditLostPageState extends State<EditLostPage> {
   String? validateLocation(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter location information';
+    }
+    return null;
+  }
+  // Validation function for the contactNumber field
+  String? validatecontactNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter contactNumber information';
     }
     return null;
   }
