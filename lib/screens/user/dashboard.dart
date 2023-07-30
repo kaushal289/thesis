@@ -129,7 +129,7 @@ class _DashboardState extends State<Dashboard> {
                   elevation: 4, // Set the elevation to control the shadow intensity
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10), // Add rounded corners to the Card
-                    side: BorderSide(color: Colors.blue, width:0.5 ), // Add a blue border to the Card
+                    side: BorderSide(color: Colors.blue, width: 1), // Add a blue border to the Card
                   ),
                   child: ListTile(
                     onTap: () => _onTileClicked(document),
